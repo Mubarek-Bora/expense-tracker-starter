@@ -5,25 +5,29 @@ function TransactionForm({ categories, onAddTransaction }) {
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
   const [category, setCategory] = useState(categories[0]);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const parsedAmount = parseFloat(amount);
     if (!description.trim() || !parsedAmount || parsedAmount <= 0) return;
 
-    onAddTransaction({
-      id: Date.now(),
-      description: description.trim(),
-      amount: parsedAmount,
-      type,
-      category,
-      date: new Date().toISOString().split('T')[0],
-    });
-
-    setDescription("");
-    setAmount("");
-    setType("expense");
-    setCategory(categories[0]);
+    setSubmitting(true);
+    try {
+      await onAddTransaction({
+        description: description.trim(),
+        amount: parsedAmount,
+        type,
+        category,
+        date: new Date().toISOString().split('T')[0],
+      });
+      setDescription("");
+      setAmount("");
+      setType("expense");
+      setCategory(categories[0]);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -53,7 +57,7 @@ function TransactionForm({ categories, onAddTransaction }) {
             <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
-        <button type="submit">Add</button>
+        <button type="submit" disabled={submitting}>{submitting ? 'Adding...' : 'Add'}</button>
       </form>
     </div>
   );

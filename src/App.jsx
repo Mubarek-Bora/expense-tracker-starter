@@ -1,28 +1,39 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import { CATEGORIES } from './constants'
-import { useLocalStorage } from './useLocalStorage'
+import { useAuth } from './AuthContext'
+import AuthForm from './components/AuthForm'
 import SummaryCards from './components/SummaryCards'
 import TransactionForm from './components/TransactionForm'
 import TransactionFilters from './components/TransactionFilters'
 import TransactionList from './components/TransactionList'
 import CategoryChart from './components/CategoryChart'
-
-const INITIAL_TRANSACTIONS = [
-  { id: 1, description: "Salary", amount: 5000, type: "income", category: "salary", date: "2025-01-01" },
-  { id: 2, description: "Rent", amount: 1200, type: "expense", category: "housing", date: "2025-01-02" },
-  { id: 3, description: "Groceries", amount: 150, type: "expense", category: "food", date: "2025-01-03" },
-  { id: 4, description: "Freelance Work", amount: 800, type: "expense", category: "salary", date: "2025-01-05" },
-  { id: 5, description: "Electric Bill", amount: 95, type: "expense", category: "utilities", date: "2025-01-06" },
-  { id: 6, description: "Dinner Out", amount: 65, type: "expense", category: "food", date: "2025-01-07" },
-  { id: 7, description: "Gas", amount: 45, type: "expense", category: "transport", date: "2025-01-08" },
-  { id: 8, description: "Netflix", amount: 15, type: "expense", category: "entertainment", date: "2025-01-10" },
-];
+import { getTransactions, createTransaction, deleteTransaction } from './services/transactions.service'
 
 function App() {
-  const [transactions, setTransactions] = useLocalStorage("transactions", INITIAL_TRANSACTIONS);
+  const { token, user, logout } = useAuth();
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filterType, setFilterType] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
+
+  useEffect(() => {
+    if (!token) return;
+    getTransactions(token)
+      .then((data) => {
+        setTransactions(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [token]);
+
+  if (!token) {
+    return <AuthForm />;
+  }
 
   const totalIncome = transactions
     .filter((t) => t.type === "income")
@@ -40,41 +51,54 @@ function App() {
     return true;
   });
 
-  const handleAddTransaction = (transaction) => {
-    setTransactions([...transactions, transaction]);
+  const handleAddTransaction = async (transaction) => {
+    const created = await createTransaction(token, transaction);
+    setTransactions((prev) => [created, ...prev]);
   };
 
-  const handleDeleteTransaction = (id) => {
-    setTransactions(transactions.filter((t) => t.id !== id));
+  const handleDeleteTransaction = async (id) => {
+    await deleteTransaction(token, id);
+    setTransactions((prev) => prev.filter((t) => t.id !== id));
   };
 
   return (
     <div className="app">
       <header className="app-header">
         <span className="app-logo">💰</span>
-        <div>
+        <div className="app-header-text">
           <h1>Finance Tracker</h1>
           <p className="subtitle">Track your income and expenses</p>
         </div>
+        <div className="app-header-actions">
+          <span className="user-email">{user?.email}</span>
+          <button className="logout-btn" onClick={logout}>Log out</button>
+        </div>
       </header>
 
-      <SummaryCards totalIncome={totalIncome} totalExpenses={totalExpenses} balance={balance} />
+      {error && <div className="auth-error">{error}</div>}
+      {loading ? (
+        <p>Loading your transactions...</p>
+      ) : (
+        <>
+          <SummaryCards totalIncome={totalIncome} totalExpenses={totalExpenses} balance={balance} />
 
-      <CategoryChart transactions={transactions} />
+          <CategoryChart transactions={transactions} />
 
-      <TransactionForm categories={CATEGORIES} onAddTransaction={handleAddTransaction} />
+          <TransactionForm categories={CATEGORIES} onAddTransaction={handleAddTransaction} />
 
-      <div className="transactions">
-        <h2>Transactions</h2>
-        <TransactionFilters
-          filterType={filterType}
-          onFilterTypeChange={setFilterType}
-          filterCategory={filterCategory}
-          onFilterCategoryChange={setFilterCategory}
-          categories={CATEGORIES}
-        />
-        <TransactionList transactions={filteredTransactions} onDeleteTransaction={handleDeleteTransaction} />
-      </div>
+          <div className="transactions">
+            <h2>Transactions</h2>
+            <TransactionFilters
+              filterType={filterType}
+              onFilterTypeChange={setFilterType}
+              filterCategory={filterCategory}
+              onFilterCategoryChange={setFilterCategory}
+              categories={CATEGORIES}
+            />
+            <TransactionList transactions={filteredTransactions} onDeleteTransaction={handleDeleteTransaction} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
