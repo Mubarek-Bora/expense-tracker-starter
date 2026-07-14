@@ -1,3 +1,19 @@
+:root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #e5e9f2;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --income: #16a34a;
+  --income-bg: #ecfdf5;
+  --expense: #dc2626;
+  --expense-bg: #fef2f2;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --radius: 14px;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -5,7 +21,8 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background-color: #ffffff;
-  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }

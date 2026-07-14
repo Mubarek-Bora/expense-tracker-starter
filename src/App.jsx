@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import './App.css'
 import { CATEGORIES } from './constants'
+import { useLocalStorage } from './useLocalStorage'
 import SummaryCards from './components/SummaryCards'
 import TransactionForm from './components/TransactionForm'
 import TransactionFilters from './components/TransactionFilters'
 import TransactionList from './components/TransactionList'
+import CategoryChart from './components/CategoryChart'
 
 const INITIAL_TRANSACTIONS = [
   { id: 1, description: "Salary", amount: 5000, type: "income", category: "salary", date: "2025-01-01" },
@@ -18,7 +20,7 @@ const INITIAL_TRANSACTIONS = [
 ];
 
 function App() {
-  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
+  const [transactions, setTransactions] = useLocalStorage("transactions", INITIAL_TRANSACTIONS);
   const [filterType, setFilterType] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
 
@@ -48,10 +50,17 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Finance Tracker</h1>
-      <p className="subtitle">Track your income and expenses</p>
+      <header className="app-header">
+        <span className="app-logo">💰</span>
+        <div>
+          <h1>Finance Tracker</h1>
+          <p className="subtitle">Track your income and expenses</p>
+        </div>
+      </header>
 
       <SummaryCards totalIncome={totalIncome} totalExpenses={totalExpenses} balance={balance} />
+
+      <CategoryChart transactions={transactions} />
 
       <TransactionForm categories={CATEGORIES} onAddTransaction={handleAddTransaction} />
 
