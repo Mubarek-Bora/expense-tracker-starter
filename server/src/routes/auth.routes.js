@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const prisma = require('../prisma');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ function isValidEmail(email) {
   return typeof email === 'string' && /^\S+@\S+\.\S+$/.test(email);
 }
 
-router.post('/register', async (req, res) => {
+router.post('/register', asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!isValidEmail(email)) {
@@ -31,9 +32,9 @@ router.post('/register', async (req, res) => {
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
   res.status(201).json({ token, user: { id: user.id, email: user.email } });
-});
+}));
 
-router.post('/login', async (req, res) => {
+router.post('/login', asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await prisma.user.findUnique({ where: { email } });
@@ -48,6 +49,6 @@ router.post('/login', async (req, res) => {
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
   res.json({ token, user: { id: user.id, email: user.email } });
-});
+}));
 
 module.exports = router;

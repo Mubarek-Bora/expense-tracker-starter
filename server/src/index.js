@@ -15,6 +15,12 @@ app.use('/api/transactions', transactionsRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 const port = process.env.PORT || 3001;
 if (require.main === module) {
   app.listen(port, () => {

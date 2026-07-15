@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../prisma');
 const requireAuth = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -16,15 +17,15 @@ function serialize(t) {
   };
 }
 
-router.get('/', async (req, res) => {
+router.get('/', asyncHandler(async (req, res) => {
   const transactions = await prisma.transaction.findMany({
     where: { userId: req.userId },
     orderBy: { date: 'desc' },
   });
   res.json(transactions.map(serialize));
-});
+}));
 
-router.post('/', async (req, res) => {
+router.post('/', asyncHandler(async (req, res) => {
   const { description, amount, type, category, date } = req.body;
 
   if (!description || !description.trim()) {
@@ -50,9 +51,9 @@ router.post('/', async (req, res) => {
   });
 
   res.status(201).json(serialize(transaction));
-});
+}));
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
 
   const existing = await prisma.transaction.findUnique({ where: { id } });
@@ -62,6 +63,6 @@ router.delete('/:id', async (req, res) => {
 
   await prisma.transaction.delete({ where: { id } });
   res.status(204).send();
-});
+}));
 
 module.exports = router;
