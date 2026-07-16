@@ -2,7 +2,7 @@ const express = require('express');
 const prisma = require('../prisma');
 const requireAuth = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
-const { parseTransactionText, generateSpendingInsights } = require('../services/ai');
+const { parseTransactionText, generateSpendingInsights, suggestCategory } = require('../services/ai');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -102,6 +102,24 @@ router.post('/ai', asyncHandler(async (req, res) => {
   });
 
   res.status(201).json(serialize(transaction));
+}));
+
+router.post('/suggest-category', asyncHandler(async (req, res) => {
+  const { description } = req.body;
+
+  if (!description || !description.trim()) {
+    return res.status(400).json({ error: 'Description is required' });
+  }
+
+  let category;
+  try {
+    category = await suggestCategory(description.trim());
+  } catch (err) {
+    console.error(err);
+    return res.status(502).json({ error: 'Could not suggest a category right now.' });
+  }
+
+  res.json({ category });
 }));
 
 router.delete('/:id', asyncHandler(async (req, res) => {

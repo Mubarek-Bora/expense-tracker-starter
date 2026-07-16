@@ -1,11 +1,25 @@
 import { useState } from 'react';
 
-function TransactionForm({ categories, onAddTransaction }) {
+function TransactionForm({ categories, onAddTransaction, onSuggestCategory }) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
   const [category, setCategory] = useState(categories[0]);
   const [submitting, setSubmitting] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
+
+  const handleSuggestCategory = async () => {
+    if (!description.trim()) return;
+    setSuggesting(true);
+    try {
+      const suggested = await onSuggestCategory(description.trim());
+      setCategory(suggested);
+    } catch {
+      // silently ignore — user can still pick a category manually
+    } finally {
+      setSuggesting(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,6 +71,14 @@ function TransactionForm({ categories, onAddTransaction }) {
             <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
+        <button
+          type="button"
+          className="suggest-category-btn"
+          onClick={handleSuggestCategory}
+          disabled={suggesting || !description.trim()}
+        >
+          {suggesting ? '...' : 'Suggest'}
+        </button>
         <button type="submit" disabled={submitting}>{submitting ? 'Adding...' : 'Add'}</button>
       </form>
     </div>

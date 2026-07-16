@@ -81,4 +81,26 @@ async function generateSpendingInsights(transactions) {
   return textBlock.text;
 }
 
-module.exports = { parseTransactionText, generateSpendingInsights, CATEGORIES };
+const CATEGORY_SCHEMA = {
+  type: 'object',
+  properties: {
+    category: { type: 'string', enum: CATEGORIES },
+  },
+  required: ['category'],
+  additionalProperties: false,
+};
+
+async function suggestCategory(description) {
+  const response = await client.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 100,
+    system: 'Pick the single best-fitting category for this transaction description from the allowed list. Use "other" if nothing fits well.',
+    messages: [{ role: 'user', content: description }],
+    output_config: { format: { type: 'json_schema', schema: CATEGORY_SCHEMA } },
+  });
+
+  const textBlock = response.content.find((block) => block.type === 'text');
+  return JSON.parse(textBlock.text).category;
+}
+
+module.exports = { parseTransactionText, generateSpendingInsights, suggestCategory, CATEGORIES };

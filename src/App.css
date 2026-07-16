@@ -496,6 +496,18 @@ form button:active {
   transform: scale(0.97);
 }
 
+.suggest-category-btn {
+  background: transparent !important;
+  color: var(--primary) !important;
+  border: 2px solid var(--primary) !important;
+  padding: 12px 18px !important;
+}
+
+.suggest-category-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Filters */
 .filters {
   display: flex;

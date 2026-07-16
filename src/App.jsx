@@ -10,7 +10,7 @@ import TransactionForm from './components/TransactionForm'
 import TransactionFilters from './components/TransactionFilters'
 import TransactionList from './components/TransactionList'
 import CategoryChart from './components/CategoryChart'
-import { getTransactions, createTransaction, createTransactionFromText, getSpendingInsights, deleteTransaction } from './services/transactions.service'
+import { getTransactions, createTransaction, createTransactionFromText, getSpendingInsights, suggestCategory, deleteTransaction } from './services/transactions.service'
 
 function App() {
   const { token, user, logout } = useAuth();
@@ -68,6 +68,11 @@ function App() {
     return insight;
   };
 
+  const handleSuggestCategory = async (description) => {
+    const { category } = await suggestCategory(token, description);
+    return category;
+  };
+
   const handleDeleteTransaction = async (id) => {
     await deleteTransaction(token, id);
     setTransactions((prev) => prev.filter((t) => t.id !== id));
@@ -100,7 +105,7 @@ function App() {
 
           <AiQuickAdd onAddTransaction={handleAiAddTransaction} />
 
-          <TransactionForm categories={CATEGORIES} onAddTransaction={handleAddTransaction} />
+          <TransactionForm categories={CATEGORIES} onAddTransaction={handleAddTransaction} onSuggestCategory={handleSuggestCategory} />
 
           <div className="transactions">
             <h2>Transactions</h2>

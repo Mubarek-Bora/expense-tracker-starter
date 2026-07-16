@@ -34,3 +34,7 @@ export function createTransactionFromText(token, text) {
 export function getSpendingInsights(token) {
   return request('/insights', token);
 }
+
+export function suggestCategory(token, description) {
+  return request('/suggest-category', token, { method: 'POST', body: JSON.stringify({ description }) });
+}
