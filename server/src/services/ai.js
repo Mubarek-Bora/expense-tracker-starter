@@ -32,4 +32,53 @@ async function parseTransactionText(text) {
   return JSON.parse(textBlock.text);
 }
 
-module.exports = { parseTransactionText, CATEGORIES };
+function buildMonthlyStats(transactions) {
+  const byMonth = {};
+
+  for (const t of transactions) {
+    const month = t.date.toISOString().slice(0, 7);
+    if (!byMonth[month]) byMonth[month] = { income: 0, expense: 0, byCategory: {} };
+
+    const amount = Number(t.amount);
+    if (t.type === 'income') {
+      byMonth[month].income += amount;
+    } else {
+      byMonth[month].expense += amount;
+      byMonth[month].byCategory[t.category] = (byMonth[month].byCategory[t.category] || 0) + amount;
+    }
+  }
+
+  return Object.entries(byMonth)
+    .sort(([a], [b]) => (a < b ? 1 : -1))
+    .slice(0, 6)
+    .map(([month, stats]) => ({
+      month,
+      income: Math.round(stats.income * 100) / 100,
+      expense: Math.round(stats.expense * 100) / 100,
+      byCategory: Object.fromEntries(
+        Object.entries(stats.byCategory).map(([cat, amt]) => [
+          cat,
+          {
+            amount: Math.round(amt * 100) / 100,
+            pctOfExpense: stats.expense > 0 ? Math.round((amt / stats.expense) * 1000) / 10 : 0,
+          },
+        ]),
+      ),
+    }));
+}
+
+async function generateSpendingInsights(transactions) {
+  const monthlyStats = buildMonthlyStats(transactions);
+
+  const response = await client.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 300,
+    system: 'You are a personal finance assistant. Given a user\'s monthly spending data (most recent month first, with each category\'s amount and its pre-computed pctOfExpense), write a short, specific insight — 2 to 4 sentences, plain text, no markdown. Use only the numbers and percentages given in the data — do not calculate your own percentages or totals. Call out month-over-month changes where the data allows it. If there is only one month of data, just summarize that month simply instead of comparing.',
+    messages: [{ role: 'user', content: JSON.stringify(monthlyStats) }],
+  });
+
+  const textBlock = response.content.find((block) => block.type === 'text');
+  return textBlock.text;
+}
+
+module.exports = { parseTransactionText, generateSpendingInsights, CATEGORIES };

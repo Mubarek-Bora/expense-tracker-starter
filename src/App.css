@@ -306,6 +306,60 @@ h1 {
   letter-spacing: 0.5px;
 }
 
+/* Spending insights */
+.spending-insights {
+  border: 2px solid var(--accent-yellow);
+  border-radius: 0;
+  padding: 24px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.spending-insights h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  font-family: var(--font-mono);
+  color: var(--accent-yellow);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.spending-insights button {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, var(--accent-yellow), var(--accent-pink));
+  color: var(--bg);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.spending-insights button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.spending-insights button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spending-insight-text {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--surface-alt);
+  border-left: 3px solid var(--accent-yellow);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 /* AI quick add */
 .ai-quick-add {
   border: 2px solid var(--primary);

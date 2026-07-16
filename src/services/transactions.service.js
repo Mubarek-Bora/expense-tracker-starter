@@ -30,3 +30,7 @@ export function deleteTransaction(token, id) {
 export function createTransactionFromText(token, text) {
   return request('/ai', token, { method: 'POST', body: JSON.stringify({ text }) });
 }
+
+export function getSpendingInsights(token) {
+  return request('/insights', token);
+}

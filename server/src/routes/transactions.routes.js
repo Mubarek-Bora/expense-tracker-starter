@@ -2,7 +2,7 @@ const express = require('express');
 const prisma = require('../prisma');
 const requireAuth = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
-const { parseTransactionText } = require('../services/ai');
+const { parseTransactionText, generateSpendingInsights } = require('../services/ai');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -24,6 +24,27 @@ router.get('/', asyncHandler(async (req, res) => {
     orderBy: { date: 'desc' },
   });
   res.json(transactions.map(serialize));
+}));
+
+router.get('/insights', asyncHandler(async (req, res) => {
+  const transactions = await prisma.transaction.findMany({
+    where: { userId: req.userId },
+    orderBy: { date: 'desc' },
+  });
+
+  if (transactions.length === 0) {
+    return res.json({ insight: 'Add a few transactions to see spending insights here.' });
+  }
+
+  let insight;
+  try {
+    insight = await generateSpendingInsights(transactions);
+  } catch (err) {
+    console.error(err);
+    return res.status(502).json({ error: 'Could not generate insights right now. Try again shortly.' });
+  }
+
+  res.json({ insight });
 }));
 
 router.post('/', asyncHandler(async (req, res) => {

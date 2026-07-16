@@ -5,11 +5,12 @@ import { useAuth } from './AuthContext'
 import AuthForm from './components/AuthForm'
 import SummaryCards from './components/SummaryCards'
 import AiQuickAdd from './components/AiQuickAdd'
+import SpendingInsights from './components/SpendingInsights'
 import TransactionForm from './components/TransactionForm'
 import TransactionFilters from './components/TransactionFilters'
 import TransactionList from './components/TransactionList'
 import CategoryChart from './components/CategoryChart'
-import { getTransactions, createTransaction, createTransactionFromText, deleteTransaction } from './services/transactions.service'
+import { getTransactions, createTransaction, createTransactionFromText, getSpendingInsights, deleteTransaction } from './services/transactions.service'
 
 function App() {
   const { token, user, logout } = useAuth();
@@ -62,6 +63,11 @@ function App() {
     setTransactions((prev) => [created, ...prev]);
   };
 
+  const handleGenerateInsights = async () => {
+    const { insight } = await getSpendingInsights(token);
+    return insight;
+  };
+
   const handleDeleteTransaction = async (id) => {
     await deleteTransaction(token, id);
     setTransactions((prev) => prev.filter((t) => t.id !== id));
@@ -89,6 +95,8 @@ function App() {
           <SummaryCards totalIncome={totalIncome} totalExpenses={totalExpenses} balance={balance} />
 
           <CategoryChart transactions={transactions} />
+
+          <SpendingInsights onGenerate={handleGenerateInsights} />
 
           <AiQuickAdd onAddTransaction={handleAiAddTransaction} />
 
