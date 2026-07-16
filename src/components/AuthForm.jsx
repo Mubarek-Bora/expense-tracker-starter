@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { login as loginRequest, register as registerRequest } from '../services/auth.service';
+import { login as loginRequest, register as registerRequest, forgotPassword } from '../services/auth.service';
 import { useAuth } from '../AuthContext';
 
 function AuthForm() {
@@ -8,16 +8,23 @@ function AuthForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
     setSubmitting(true);
     try {
-      const request = mode === 'login' ? loginRequest : registerRequest;
-      const { token, user } = await request(email, password);
-      setAuth(token, user);
+      if (mode === 'forgot') {
+        const { message } = await forgotPassword(email);
+        setMessage(message);
+      } else {
+        const request = mode === 'login' ? loginRequest : registerRequest;
+        const { token, user } = await request(email, password);
+        setAuth(token, user);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -25,14 +32,27 @@ function AuthForm() {
     }
   };
 
+  const switchMode = (next) => {
+    setMode(next);
+    setError('');
+    setMessage('');
+  };
+
+  const title = {
+    login: 'Log in to your account',
+    register: 'Create an account',
+    forgot: 'Reset your password',
+  }[mode];
+
   return (
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">💰</div>
         <h1>Finance Tracker</h1>
-        <p className="subtitle">{mode === 'login' ? 'Log in to your account' : 'Create an account'}</p>
+        <p className="subtitle">{title}</p>
 
         {error && <div className="auth-error">{error}</div>}
+        {message && <p className="auth-message">{message}</p>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <input
@@ -42,30 +62,51 @@ function AuthForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          {mode !== 'forgot' && (
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          )}
           <button type="submit" disabled={submitting}>
-            {submitting ? 'Please wait...' : mode === 'login' ? 'Log In' : 'Sign Up'}
+            {submitting
+              ? 'Please wait...'
+              : mode === 'login'
+              ? 'Log In'
+              : mode === 'register'
+              ? 'Sign Up'
+              : 'Send Reset Link'}
           </button>
         </form>
 
+        {mode === 'login' && (
+          <p className="auth-toggle">
+            <button type="button" className="link-btn" onClick={() => switchMode('forgot')}>
+              Forgot password?
+            </button>
+          </p>
+        )}
+
         <p className="auth-toggle">
-          {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-          <button
-            type="button"
-            className="link-btn"
-            onClick={() => {
-              setMode(mode === 'login' ? 'register' : 'login');
-              setError('');
-            }}
-          >
-            {mode === 'login' ? 'Sign up' : 'Log in'}
-          </button>
+          {mode === 'forgot' ? (
+            <button type="button" className="link-btn" onClick={() => switchMode('login')}>
+              Back to log in
+            </button>
+          ) : (
+            <>
+              {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+              <button
+                type="button"
+                className="link-btn"
+                onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
+              >
+                {mode === 'login' ? 'Sign up' : 'Log in'}
+              </button>
+            </>
+          )}
         </p>
       </div>
     </div>

@@ -3,6 +3,7 @@ import './App.css'
 import { CATEGORIES } from './constants'
 import { useAuth } from './AuthContext'
 import AuthForm from './components/AuthForm'
+import ResetPasswordForm from './components/ResetPasswordForm'
 import SummaryCards from './components/SummaryCards'
 import AiQuickAdd from './components/AiQuickAdd'
 import SpendingInsights from './components/SpendingInsights'
@@ -32,6 +33,11 @@ function App() {
         setLoading(false);
       });
   }, [token]);
+
+  const resetToken = new URLSearchParams(window.location.search).get('resetToken');
+  if (resetToken) {
+    return <ResetPasswordForm token={resetToken} />;
+  }
 
   if (!token) {
     return <AuthForm />;

@@ -8,11 +8,13 @@ datasource db {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  email        String        @unique
-  passwordHash String
-  createdAt    DateTime      @default(now())
-  transactions Transaction[]
+  id                  Int           @id @default(autoincrement())
+  email               String        @unique
+  passwordHash        String
+  createdAt           DateTime      @default(now())
+  resetToken          String?       @unique
+  resetTokenExpiresAt DateTime?
+  transactions        Transaction[]
 }
 
 model Transaction {
