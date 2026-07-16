@@ -26,3 +26,7 @@ export function createTransaction(token, transaction) {
 export function deleteTransaction(token, id) {
   return request(`/${id}`, token, { method: 'DELETE' });
 }
+
+export function createTransactionFromText(token, text) {
+  return request('/ai', token, { method: 'POST', body: JSON.stringify({ text }) });
+}

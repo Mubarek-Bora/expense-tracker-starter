@@ -306,6 +306,78 @@ h1 {
   letter-spacing: 0.5px;
 }
 
+/* AI quick add */
+.ai-quick-add {
+  border: 2px solid var(--primary);
+  border-radius: 0;
+  padding: 24px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.ai-quick-add h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  font-family: var(--font-mono);
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ai-quick-add-form {
+  display: flex;
+  gap: 10px;
+}
+
+.ai-quick-add-form input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 0;
+  font-size: 14px;
+  background: var(--surface-alt);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+.ai-quick-add-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--shadow);
+}
+
+.ai-quick-add-form button {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, var(--primary), var(--accent-pink));
+  color: var(--bg);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.ai-quick-add-form button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.ai-quick-add-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-quick-add-error {
+  margin-top: 12px;
+  color: var(--expense);
+  font-size: 13px;
+}
+
 /* Form */
 form {
   display: flex;
@@ -469,6 +541,10 @@ tbody tr:last-child td {
 
   form button {
     width: 100%;
+  }
+
+  .ai-quick-add-form {
+    flex-direction: column;
   }
 
   .filters {

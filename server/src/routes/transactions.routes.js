@@ -2,6 +2,7 @@ const express = require('express');
 const prisma = require('../prisma');
 const requireAuth = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
+const { parseTransactionText } = require('../services/ai');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -47,6 +48,35 @@ router.post('/', asyncHandler(async (req, res) => {
       type,
       category: category || 'other',
       date: date ? new Date(date) : new Date(),
+    },
+  });
+
+  res.status(201).json(serialize(transaction));
+}));
+
+router.post('/ai', asyncHandler(async (req, res) => {
+  const { text } = req.body;
+
+  if (!text || !text.trim()) {
+    return res.status(400).json({ error: 'Text is required' });
+  }
+
+  let parsed;
+  try {
+    parsed = await parseTransactionText(text.trim());
+  } catch (err) {
+    console.error(err);
+    return res.status(502).json({ error: 'Could not understand that transaction. Try rephrasing it.' });
+  }
+
+  const transaction = await prisma.transaction.create({
+    data: {
+      userId: req.userId,
+      description: parsed.description,
+      amount: parsed.amount,
+      type: parsed.type,
+      category: parsed.category,
+      date: new Date(parsed.date),
     },
   });
 
